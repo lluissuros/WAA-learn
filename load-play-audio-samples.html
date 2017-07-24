@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>load audio buffers</title>
+</head>
+<body>
+  <script>
+  const audioContext = new AudioContext();
+
+  let audioBuffer;
+
+  //get sound
+  // NOTE: Remember opening a webserver e.g python -m SimpleHTTPServer>
+  var getSound = new XMLHttpRequest();
+  getSound.open('get', 'conga-6.wav' , true); //your audio of preference
+  getSound.responseType = 'arraybuffer'; //general container for binary data
+  getSound.onload = () => {
+    //we need to decode the data
+     audioContext.decodeAudioData(getSound.response, (buffer) => {
+       audioBuffer = buffer;
+     });
+  };
+  getSound.send();
+
+  //create buffer that can actually work on the node graph.
+  //Note that we create a new buffer each time we play!
+  const playback = () => {
+    const playSound = audioContext.createBufferSource();
+    playSound.buffer = audioBuffer;
+    playSound.connect(audioContext.destination);
+    playSound.start();
+  };
+
+  //play!
+  window.addEventListener('mousedown', playback);
+
+  </script>
+</body>
+</html>
