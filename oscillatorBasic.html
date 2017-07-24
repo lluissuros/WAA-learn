@@ -1,0 +1,35 @@
+<script>
+  console.log('testing 2 osc');
+
+  const audioContext = new AudioContext();
+
+  const osc1 = audioContext.createOscillator();
+  const osc2 = audioContext.createOscillator();
+  const gain1 = audioContext.createGain();
+  const gain2 = audioContext.createGain();
+
+  osc1.type = 'triangle'; //sine, square, sawtooth, triangle, custom
+  osc1.frequency.value = 300;
+  osc1.detune.value = 50;
+
+  osc2.type = 'sine'; //sine, square, sawtooth, triangle, custom
+  osc2.frequency.value = 600*4/5;
+  osc2.detune.value = 50;
+
+  gain1.gain.value = 0.3;
+  gain2.gain.value = 0.5;
+
+  osc1.connect(gain1);
+  osc2.connect(gain2);
+  gain1.connect(audioContext.destination);
+  gain2.connect(audioContext.destination);
+
+  osc1.start(audioContext.currentTime);
+  osc2.start(audioContext.currentTime);
+
+  setTimeout(() => {
+    osc1.stop();
+    osc2.stop();
+  },2000)
+
+</script>
