@@ -1,0 +1,55 @@
+<script>
+  console.log('testing biquad filter');
+  /**
+  available types:
+
+  lowpass
+  highpass
+  bandpass
+  lowshelf
+  highshelf
+  peaking
+  notch
+  allpass
+  **/
+
+  const audioContext = new AudioContext();
+
+  const osc = audioContext.createOscillator();
+  const lfo = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  const lfoGain = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+
+  filter.type = 'bandpass';
+  console.log('filter type: ' + filter.type);
+
+  osc.type = 'sawtooth';
+  osc.frequency.value = 300;
+
+  gain.gain.value = 0.5;
+
+  filter.frequency.value = 800;
+  filter.Q.value = 3; //bandwith
+
+  osc.connect(gain);
+  gain.connect(filter);
+  filter.connect(audioContext.destination);
+
+  //lfo to hear the filter better
+  lfo.frequency.value = 1 ;
+  lfoGain.gain.value = 500;
+  lfo.connect(lfoGain);
+  lfoGain.connect(filter.frequency);
+
+  osc.start();
+  lfo.start();
+
+  setTimeout(() => {
+    lfo.stop();
+  },6000);
+  setTimeout(() => {
+    osc.stop();
+  },10000);
+
+</script>
