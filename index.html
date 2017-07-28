@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>test reverbs</title>
+    <script src="audioContextCheck.js"></script>
+    <script src="audiolib.js"></script>
+</head>
+<body>
+<script>
+    // NOTE: Remember opening a webserver e.g python -m SimpleHTTPServer>
+    const conga = audioFileLoader('conga-6.wav');
+
+    //reverb bus
+    const revConvolver = convolverFromImpulse('1 Halls 08 Large & Deep.2.1.wav');
+    const revGain = audioContext.createGain();
+    revGain.gain.value = 0.3;
+    revConvolver.connect(revGain).connect(audioContext.destination);
+
+    //dry + wet
+    const playConga = () => {
+        conga.play(1, 1, revConvolver, audioContext.destination);
+    };
+
+    window.addEventListener('mousedown', () => playConga());
+
+</script>
+</body>
+</html>
