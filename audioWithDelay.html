@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>test reverbs</title>
+    <script src="audioContextCheck.js"></script>
+    <script src="audiolib.js"></script>
+</head>
+<body>
+<script>
+    const conga = audioFileLoader('conga1.wav');
+
+    //the argument indicates the max delay(needs to allocate memory in advance)
+    const delay = audioContext.createDelay(2);
+    const feedbackGain = audioContext.createGain();
+    const dryGain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    delay.delayTime.value = 0.2;
+    filter.frequency.value = 1000;
+    feedbackGain.gain.value = 0.7;
+
+    conga.connect(dryGain).connect(audioContext.destination);
+    conga.connect(delay);
+    delay.connect(feedbackGain);
+    // We need to feedback the delayed signal into the delay
+    feedbackGain.connect(filter).connect(delay);
+    delay.connect(audioContext.destination);
+
+    //dry + wet
+    const playConga = () => {
+        conga.play(1, 1);
+    };
+
+    window.addEventListener('mousedown', () => playConga());
+
+</script>
+</body>
+</html>
