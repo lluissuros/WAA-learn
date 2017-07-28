@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>load audio buffers</title>
+</head>
+<body>
+  <script>
+  //ugly test to lay and array of osc, it works!
+
+  var ac = ac || new AudioContext();
+
+  var playSound = (baseFreq=200, numOsc=10 ) => {
+      var arr = Array(numOsc).fill(baseFreq);
+
+      var oscs = arr.map((baseFreq, index) => {
+          const osc = ac.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.value = baseFreq * 5/4 * (index+1);
+          console.log(osc.frequency.value);
+          return osc;
+      });
+
+      var playTheOscs = (oscs) => {
+          oscs.forEach((osc,i,arr) => {
+
+              //the osc
+              const gain = ac.createGain();
+              gain.gain.value = (1/(arr.length+1)) * (1/osc.frequency.value) * 100;
+              osc.connect(gain);
+              gain.connect(ac.destination);
+
+              //lfo for gain
+              const lfo = ac.createOscillator();
+              const lfoFreqFactor = Math.random() * 100;
+              const lfoFreq = Math.random() / lfoFreqFactor;
+              const lfoGain = ac.createGain();
+
+              lfo.frequency.value = lfoFreq;
+              lfoGain.gain.value = Math.random() * 100;
+              lfo.connect(lfoGain);
+              lfoGain.connect(osc.detune);
+
+              lfoGain.gain.linearRampToValueAtTime(0.001, 50 + ac.currentTime + lfoFreqFactor);
+              gain.gain.linearRampToValueAtTime(0, 60 + ac.currentTime + lfoFreqFactor);
+
+              lfo.start();
+              osc.start();
+          });
+      }
+      playTheOscs(oscs);
+  };
+
+  //I play it many so I have a lot of oscs and sounds thick
+  playSound(100,40);
+  playSound(400,30);
+  playSound(50,30);
+  playSound(25,20);
+
+  </script>
+</body>
+</html>
