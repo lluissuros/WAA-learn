@@ -12,7 +12,6 @@
     const revConvolver = convolverFromImpulse('1 Halls 08 Large & Deep.2.1.wav');
     const revGain = audioContext.createGain();
     revGain.gain.value = 0.3;
-    revConvolver.connect(revGain).connect(audioContext.destination);
 
     const osc = audioContext.createOscillator();
     const lfo = audioContext.createOscillator();
@@ -23,10 +22,19 @@
     lfo.frequency.value = 0.2;
     osc.type = 'sawtooth';
 
-    osc.connect(revConvolver);
-    osc.connect(oscDryGain).connect(audioContext.destination);
+    osc
+        .connect(revConvolver)
+        .connect(revGain)
+        .connect(audioContext.destination);
 
-    lfo.connect(lfoGain).connect(osc.frequency);
+    osc
+        .connect(oscDryGain)
+        .connect(audioContext.destination);
+
+    lfo
+        .connect(lfoGain)
+        .connect(osc.frequency);
+
     osc.start();
     lfo.start();
 
