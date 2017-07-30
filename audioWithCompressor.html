@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>test compressor</title>
+    <script src="audioContextCheck.js"></script>
+    <script src="audiolib.js"></script>
+</head>
+<style>
+    #noCompressor {
+        height: 100px;
+        background-color: yellow;
+    }
+    #withCompressor {
+        height: 100px;
+        background-color: aquamarine;
+    }
+    #compressionMeter {
+        position: absolute;
+        width: 50px;
+        display: block;
+        top: 0px;
+        background: red;
+    }
+</style>
+<body>
+    <div id="noCompressor">without compression, Click me</div>
+    <div id="withCompressor">with compression, Click me</div>
+    <div id="compressionMeter"></div>
+
+<script>
+    // threshold
+    // knee
+    // ratio
+    // reduction
+    // attack
+    // release
+    const congaDry = audioFileLoader('conga1.wav');
+    const congaCompressed = audioFileLoader('conga1.wav');
+
+    const compressor = audioContext.createDynamicsCompressor();
+    let cachedMeterValue;
+    let reductionCheckerId;
+    compressor.threshold.value = -50;
+    compressor.ratio.value =  20;
+
+    // naive visualization of comp reduction
+    const compReductionMeter = () => {
+        const reduction = Math.ceil(compressor.reduction);
+        const meterHeight = ((-1 * reduction) + '%');
+        cachedMeterValue = meterHeight;
+        document.getElementById('compressionMeter').style.height = meterHeight;
+        requestAnimationFrame(compReductionMeter);
+    };
+    // there is a bug in the current implementation of web audio,
+    // reduction does not go back to 0 if input stops.
+    const reductionChecker = () => {
+        if (reductionCheckerId) {return reductionCheckerId;}
+        return window.setInterval(() => {
+            const actualheight = document.getElementById('compressionMeter').style.height;
+            console.log('checked');
+            if (cachedMeterValue !== 0 && (cachedMeterValue === actualheight)) {
+                document.getElementById('compressionMeter').style.display = 'none';
+                window.clearInterval(reductionCheckerId);
+                reductionCheckerId = null;
+            }
+        },500);
+    };
+
+    congaCompressed
+        .connect(compressor)
+        .connect(audioContext.destination);
+
+    congaDry.connect(audioContext.destination);
+
+    const playCongaDry = () => {
+        congaDry.play(1, 1);
+    };
+    const playCongaCompressed = () => {
+        congaCompressed.play(1, 1);
+        document.getElementById('compressionMeter').style.display = 'block';
+        reductionCheckerId = reductionChecker();
+        compReductionMeter();
+    };
+
+    document.getElementById('noCompressor').addEventListener('click', () => playCongaDry());
+    document.getElementById('withCompressor').addEventListener('click', () => playCongaCompressed());
+
+</script>
+</body>
+</html>
